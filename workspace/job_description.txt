@@ -1,0 +1,6 @@
+Senior Python Engineer
+We are looking for a senior Python engineer with experience in:
+- Python 3.10+
+- LangChain or LangGraph
+- MCP (Model Context Protocol)
+- 5+ years of experience

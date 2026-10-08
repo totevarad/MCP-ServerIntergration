@@ -1,0 +1,72 @@
+MCP integration
+
+Brief
+Learning Objectives
+Understand Model Context Protocol
+
+Replace custom tools with MCP servers
+
+Implement standardized tool interfaces
+
+Deploy production-ready systems
+
+Assignment Requirements
+Part A: MCP Server Implementation (50%)
+
+Create filesystem_mcp_server.py:
+
+Convert File System Tools to MCP
+
+Implement MCP protocol specification
+
+Expose all Milestone 1 tools as MCP resources
+
+Add new MCP-specific capabilities:
+
+watch_directory() - Monitor for new resumes
+
+batch_process() - Handle multiple files efficiently
+
+MCP Server Features
+
+JSON-RPC 2.0 compliant interface
+
+Proper error handling and status codes
+
+Resource discovery endpoints
+
+Configuration management
+
+Part B: Agent Refactoring (30%)
+
+Update matching_agent.py:
+
+Replace Custom Tools
+
+Remove direct file system tools
+
+Connect to MCP server via client
+
+Maintain same functionality with cleaner architecture
+
+Multi-MCP Integration (Bonus)
+
+Connect to additional MCP servers (e.g., web search, database)
+
+Demonstrate agent using multiple MCP resources
+
+Submission guidelines
+Deliverables
+MCP-based filesystem server implementation (filesystem_mcp_server.py)
+
+Refactored LangGraph agent with MCP client integration (matching_agent.py)
+
+JSON-RPC 2.0 compliant MCP server with resource discovery
+
+Implementation of watch_directory() and batch_process() capabilities
+
+State machine/workflow diagram of agent ↔ MCP interaction
+
+Test scenarios demonstrating MCP resource usage and agent workflow
+
+Demo video (5–6 minutes) showing MCP server, agent integration, and end-to-end execution
