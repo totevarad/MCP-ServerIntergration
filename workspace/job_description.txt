@@ -1,6 +1,55 @@
-Senior Python Engineer
-We are looking for a senior Python engineer with experience in:
-- Python 3.10+
-- LangChain or LangGraph
-- MCP (Model Context Protocol)
-- 5+ years of experience
+Job Title: Senior Software Development Engineer - Python
+Job Location: Hyderabad, India
+Company: Amazon
+
+Amazon is looking for a passionate and experienced Python Developer to join our team in Hyderabad. In this role, you will be responsible for designing, developing, and maintaining high-quality software solutions for a fast-paced, high-growth environment.
+
+Key Responsibilities:
+
+Design and implement scalable, reliable, and maintainable Python-based applications.
+
+Collaborate with cross-functional teams, including product managers, designers, and other engineers, to deliver high-quality features.
+
+Build and maintain robust APIs and services that serve internal and external customers.
+
+Troubleshoot production issues and provide timely resolutions.
+
+Participate in code reviews, technical discussions, and architectural decisions.
+
+Mentor junior engineers and contribute to the team's technical growth.
+
+Stay updated with the latest trends and technologies in the software engineering domain.
+
+Required Skills & Qualifications:
+
+Bachelor's degree in Computer Science, Engineering, or a related field.
+
+5+ years of professional software development experience.
+
+Strong proficiency in Python programming.
+
+Solid understanding of object-oriented design, data structures, and algorithms.
+
+Experience with web frameworks such as Django, Flask, or FastAPI.
+
+Familiarity with database technologies (e.g., PostgreSQL, MySQL, MongoDB).
+
+Experience with cloud platforms (e.g., AWS, Azure, GCP) is a plus.
+
+Strong problem-solving and analytical skills.
+
+Excellent communication and teamwork abilities.
+
+Preferred Qualifications:
+
+Master's degree in Computer Science or a related field.
+
+Experience with microservices architecture and containerization technologies (Docker, Kubernetes).
+
+Knowledge of CI/CD pipelines and DevOps practices.
+
+Contributions to open-source projects.
+
+About Amazon:
+
+Amazon is a global technology company focused on e-commerce, cloud computing, digital streaming, and artificial intelligence. We are committed to providing exceptional service to our customers while fostering an inclusive and innovative work environment for our employees.

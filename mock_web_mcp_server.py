@@ -4,6 +4,9 @@ from mcp.server.models import InitializationOptions
 import mcp.server.stdio
 import mcp.types as types
 import json
+from logger_config import setup_logger
+
+logger = setup_logger("web_mcp", "web_search_server.log", to_stderr=True)
 
 # Initialize the MCP server
 server = Server("web-search-server")
@@ -33,6 +36,7 @@ async def handle_call_tool(
     if arguments is None:
         arguments = {}
         
+    logger.info(f"Incoming tool execution: '{name}' | arguments={arguments}")
     try:
         if name == "search_web":
             query = arguments.get("query", "")
@@ -42,10 +46,13 @@ async def handle_call_tool(
                 "query": query,
                 "results": f"Mock web search result for '{query}': High relevance. This technology or person is highly regarded in the industry."
             }
+            logger.info(f"search_web('{query}') succeeded.")
             return [types.TextContent(type="text", text=json.dumps(response))]
         else:
+            logger.error(f"Unknown tool requested: '{name}'")
             raise ValueError(f"Unknown tool: {name}")
     except Exception as e:
+        logger.exception(f"Exception in tool '{name}': {e}")
         return [types.TextContent(type="text", text=f"Error: Server exception: {str(e)}")]
 
 async def main():

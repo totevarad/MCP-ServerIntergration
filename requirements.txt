@@ -1,6 +1,7 @@
 mcp
 langgraph
 langchain-core
+langchain-groq
 langchain-openai
 pydantic
 python-dotenv

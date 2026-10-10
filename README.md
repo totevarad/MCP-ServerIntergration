@@ -14,7 +14,7 @@ This project demonstrates a fully decoupled, agentic architecture leveraging the
 
 *   **Protocol:** [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) via the official `mcp` Python SDK
 *   **Agent Framework:** LangGraph & LangChain (`langchain-core`, `langchain-openai`)
-*   **LLM Provider:** OpenAI (GPT-4o)
+*   **LLM Provider:** Groq (e.g. `openai/gpt-oss-120b`, `qwen/qwen3.8-27b`) or OpenAI (`gpt-4o`)
 *   **Document Parsers:** `pypdf`, `python-docx`
 *   **Language:** Python 3.10+
 
@@ -31,7 +31,7 @@ This project demonstrates a fully decoupled, agentic architecture leveraging the
 
 ### Prerequisites
 *   Python 3.10 or higher.
-*   An OpenAI API Key (required to run the LangGraph agent).
+*   A Groq API Key (`GROQ_API_KEY`) or OpenAI API Key (`OPENAI_API_KEY`).
 
 ### 1. Installation
 
@@ -49,10 +49,12 @@ pip install -r requirements.txt
 
 ### 2. Configuration
 
-Create a `.env` file in the root of the project and add your OpenAI API Key:
+Create a `.env` file in the root of the project and add your Groq API Key:
 
 ```env
-OPENAI_API_KEY=your-api-key-here
+GROQ_API_KEY=gsk_...
+# Optional: Specify Groq model (defaults to openai/gpt-oss-120b)
+# GROQ_MODEL=openai/gpt-oss-120b
 ```
 
 ### 3. Usage

@@ -14,11 +14,16 @@ import mcp.types as types
 # Add File_System_Tools to python path to import fs_tools
 sys.path.append(os.path.join(os.path.dirname(__file__), "File_System_Tools"))
 import fs_tools
+from logger_config import setup_logger
+
+# Initialize logger (to stderr so stdio JSON-RPC remains untouched)
+logger = setup_logger("filesystem_mcp", "filesystem_server.log", to_stderr=True)
 
 # Configure the base directory for sandboxing (Phase 2 requirement)
 workspace_dir = Path(__file__).parent / "workspace"
 workspace_dir.mkdir(exist_ok=True)
 fs_tools.set_base_dir(workspace_dir)
+logger.info(f"Filesystem MCP Server sandboxed to workspace: {workspace_dir}")
 
 # Initialize the MCP server
 server = Server("filesystem-server")
@@ -29,6 +34,7 @@ _DIRECTORY_STATE: Dict[str, Set[str]] = {}
 @server.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
     """List available file system tools."""
+    logger.debug("Client requested tools list.")
     return [
         types.Tool(
             name="read_file",
@@ -120,19 +126,23 @@ async def handle_call_tool(
     if arguments is None:
         arguments = {}
         
+    logger.info(f"Incoming tool execution: '{name}' | arguments={arguments}")
     try:
         if name == "read_file":
             filepath = arguments.get("filepath", "")
             result = fs_tools.read_file(filepath)
             if not result.get("success"):
-                # Return proper error info within the text content
-                return [types.TextContent(type="text", text=f"Error: {result.get('error')}")]
+                err_msg = result.get("error", "Unknown error")
+                logger.warning(f"read_file('{filepath}') failed: {err_msg}")
+                return [types.TextContent(type="text", text=f"Error: {err_msg}")]
+            logger.info(f"read_file('{filepath}') succeeded | size={result.get('file_size')} bytes")
             return [types.TextContent(type="text", text=json.dumps(result))]
             
         elif name == "list_files":
-            directory = arguments.get("directory", ".")
-            extension = arguments.get("extension")
+            directory = arguments.get("directory") or "."
+            extension = arguments.get("extension") or None
             result = fs_tools.list_files(directory, extension)
+            logger.info(f"list_files('{directory}', ext={extension}) succeeded | found {len(result)} files")
             return [types.TextContent(type="text", text=json.dumps(result))]
             
         elif name == "write_file":
@@ -140,7 +150,10 @@ async def handle_call_tool(
             content = arguments.get("content", "")
             result = fs_tools.write_file(filepath, content)
             if not result.get("success"):
-                return [types.TextContent(type="text", text=f"Error: {result.get('error')}")]
+                err_msg = result.get("error", "Unknown error")
+                logger.warning(f"write_file('{filepath}') failed: {err_msg}")
+                return [types.TextContent(type="text", text=f"Error: {err_msg}")]
+            logger.info(f"write_file('{filepath}') succeeded | written={result.get('bytes_written')} bytes")
             return [types.TextContent(type="text", text=json.dumps(result))]
             
         elif name == "search_in_file":
@@ -148,11 +161,14 @@ async def handle_call_tool(
             keyword = arguments.get("keyword", "")
             result = fs_tools.search_in_file(filepath, keyword)
             if not result.get("success"):
-                return [types.TextContent(type="text", text=f"Error: {result.get('error')}")]
+                err_msg = result.get("error", "Unknown error")
+                logger.warning(f"search_in_file('{filepath}', '{keyword}') failed: {err_msg}")
+                return [types.TextContent(type="text", text=f"Error: {err_msg}")]
+            logger.info(f"search_in_file('{filepath}', '{keyword}') succeeded | matches={result.get('total_matches')}")
             return [types.TextContent(type="text", text=json.dumps(result))]
             
         elif name == "watch_directory":
-            directory = arguments.get("directory", ".")
+            directory = arguments.get("directory") or "."
             result = fs_tools.list_files(directory)
             current_files = {f["name"] for f in result}
             
@@ -161,12 +177,14 @@ async def handle_call_tool(
             
             # Update state
             _DIRECTORY_STATE[directory] = current_files
+            logger.info(f"watch_directory('{directory}') checked | new={list(new_files)} | total={len(current_files)}")
             return [types.TextContent(type="text", text=json.dumps({"new_files": list(new_files), "total_files": len(current_files)}))]
             
         elif name == "batch_process":
             operations = arguments.get("operations", [])
+            logger.info(f"batch_process starting batch of {len(operations)} operations")
             results = []
-            for op in operations:
+            for idx, op in enumerate(operations):
                 op_tool = op.get("tool")
                 op_args = op.get("arguments", {})
                 try:
@@ -179,20 +197,26 @@ async def handle_call_tool(
                     elif op_tool == "search_in_file":
                         results.append(fs_tools.search_in_file(op_args.get("filepath", ""), op_args.get("keyword", "")))
                     else:
-                        results.append({"success": False, "error": f"Unsupported batch tool: {op_tool}"})
+                        err = f"Unsupported batch tool: {op_tool}"
+                        logger.warning(f"Batch op #{idx} error: {err}")
+                        results.append({"success": False, "error": err})
                 except Exception as e:
+                    logger.exception(f"Batch op #{idx} exception: {e}")
                     results.append({"success": False, "error": str(e)})
+            logger.info(f"batch_process completed {len(results)} operations")
             return [types.TextContent(type="text", text=json.dumps({"batch_results": results}))]
             
         else:
+            logger.error(f"Unknown tool requested: '{name}'")
             raise ValueError(f"Unknown tool: {name}")
     except Exception as e:
-        # Catch unexpected errors to maintain JSON-RPC compliance without crashing the server
+        logger.exception(f"Server exception in tool '{name}': {e}")
         return [types.TextContent(type="text", text=f"Error: Server exception: {str(e)}")]
 
 @server.list_resources()
 async def handle_list_resources() -> list[types.Resource]:
     """List available resources in the base directory."""
+    logger.debug("Client requested resources list.")
     resources = []
     files = fs_tools.list_files(".")
     for f in files:
@@ -204,22 +228,28 @@ async def handle_list_resources() -> list[types.Resource]:
                 mimeType="text/plain" if f["extension"] == ".txt" else "application/octet-stream"
             )
         )
+    logger.info(f"list_resources returned {len(resources)} resources.")
     return resources
 
 @server.read_resource()
 async def handle_read_resource(uri: AnyUrl) -> str | bytes:
     """Read a specific resource by URI."""
     uri_str = str(uri)
+    logger.info(f"Client requested read_resource: {uri_str}")
     if uri_str.startswith("file:///"):
         filename = uri_str[len("file:///"):]
         result = fs_tools.read_file(filename)
         if result.get("success"):
             content = result.get("content")
             return content if content is not None else ""
-        raise ValueError(result.get("error"))
+        err_msg = result.get("error", "Unknown error")
+        logger.warning(f"read_resource failed for '{filename}': {err_msg}")
+        raise ValueError(err_msg)
+    logger.error(f"Unsupported URI scheme: {uri_str}")
     raise ValueError(f"Unsupported URI scheme: {uri_str}")
 
 async def main():
+    logger.info("Starting Filesystem MCP Server stdio loop...")
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream,
@@ -233,6 +263,7 @@ async def main():
                 ),
             )
         )
+        logger.info("Filesystem MCP Server stdio loop terminated cleanly.")
 
 if __name__ == "__main__":
     asyncio.run(main())
